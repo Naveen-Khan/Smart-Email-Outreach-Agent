@@ -61,6 +61,7 @@ An AI-powered email automation system built with **n8n**, **OpenRouter LLMs**, *
 * Gmail API
 * Google Drive API
 * JavaScript
+* GCP
 
 ## 📈 Benefits
 
@@ -77,14 +78,6 @@ An AI-powered email automation system built with **n8n**, **OpenRouter LLMs**, *
 * B2B Sales Outreach
 * Customer Acquisition
 * Marketing Automation
-
-## Future Enhancements
-
-* CRM Integration (HubSpot, Salesforce)
-* Email Open & Click Tracking
-* Automated Follow-up Sequences
-* Lead Scoring
-* Multi-Channel Outreach (LinkedIn, WhatsApp, SMS)
 
 ## Author
 
