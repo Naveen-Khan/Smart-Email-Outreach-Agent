@@ -1,4 +1,4 @@
-# AI Cold Email Automation Agent
+# OutreachAI - Smart Email Outreach Agent
 
 An AI-powered email automation system built with **n8n**, **OpenRouter LLMs**, **Google Sheets**, and **Gmail**. The workflow automatically generates and sends personalized sales emails to potential clients, helping businesses promote their services at scale with minimal manual effort.
 
