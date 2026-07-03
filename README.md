@@ -1,43 +1,87 @@
+# AI Cold Email Automation Agent
 
----
+An AI-powered email automation system built with **n8n**, **OpenRouter LLMs**, **Google Sheets**, and **Gmail**. The workflow automatically generates and sends personalized sales emails to potential clients, helping businesses promote their services at scale with minimal manual effort.
 
-## 🗣️ Simple English Summary
+## 🚀 Features
 
-**OutreachAI** sends personalized sales emails to companies automatically. It reads company data from a spreadsheet, uses AI to write unique emails, sends them, and saves every email back to the spreadsheet. This saves **90% of manual work**, costs only **$0.02 per email**, and is **10x faster** than doing it manually.
+* Sends 50+ personalized sales emails daily
+* AI-generated email content using Large Language Models (LLMs)
+* Reads prospect data directly from Google Sheets
+* Automatically sends emails via Gmail
+* Stores generated email content back into Google Sheets
+* Fully automated workflow with scheduled execution
+* Reduces manual outreach effort by approximately 90%
+* Cost-efficient operation (~$0.02 per email)
 
-**Key benefits:**
-- **Saves time** — everything runs automatically
-- **Personalized** — each email is unique
-- **Full record** — every email is saved with content
-- **Low cost** — only $0.02 per email
-- **Complete history** — all communications are tracked
+## 🏗️ Workflow Architecture
 
----
+1. **Schedule Trigger**
 
-## 🏷️ Tech Tags
+   * Starts the workflow automatically at predefined intervals.
 
-**n8n · OpenRouter AI · Google Sheets · Gmail · AI Automation · Sales Outreach · Lead Generation · Email Marketing · JavaScript**
+2. **Google Sheets**
 
----
+   * Reads company and prospect information from a spreadsheet.
 
-## 📄 License
+3. **Limit Node**
 
-This project is open-source and available for personal and commercial use.
+   * Controls the number of records processed per execution.
 
----
+4. **AI Agent (Email Writer)**
 
-## 👨‍💻 Author
+   * Uses an OpenRouter LLM to generate personalized outreach emails based on company information.
 
-**Naveen Khan**  
-AI Engineer | Computer Systems Engineering Graduate  
-[LinkedIn](https://www.linkedin.com/in/naveen-khan-417103258/) · [GitHub](https://github.com/Naveen-Khan) · [Portfolio](https://naveen-khan.github.io/portfolio/)
+5. **JavaScript Processing**
 
----
+   * Formats and structures the generated content.
 
-## 📬 Connect
+6. **Google Drive**
 
-Have questions or suggestions? Feel free to reach out!
+   * Downloads supporting files or templates if required.
 
----
+7. **Gmail**
 
-<p align="center">Made with ❤️ by Naveen Khan</p>
+   * Sends personalized sales emails to target companies.
+
+8. **Google Sheets Update**
+
+   * Saves generated email content and workflow status back into the spreadsheet.
+
+## 🛠️ Tech Stack
+
+* n8n
+* OpenRouter
+* Large Language Models (LLMs)
+* Google Sheets API
+* Gmail API
+* Google Drive API
+* JavaScript
+
+## 📈 Benefits
+
+* Automates repetitive outreach tasks
+* Generates highly personalized email content
+* Maintains a complete record of all sent emails
+* Improves lead generation efficiency
+* Scalable and low-cost solution for sales teams
+
+## 🎯 Use Cases
+
+* AI Service Promotion
+* Lead Generation Campaigns
+* B2B Sales Outreach
+* Customer Acquisition
+* Marketing Automation
+
+## Future Enhancements
+
+* CRM Integration (HubSpot, Salesforce)
+* Email Open & Click Tracking
+* Automated Follow-up Sequences
+* Lead Scoring
+* Multi-Channel Outreach (LinkedIn, WhatsApp, SMS)
+
+## Author
+
+**Naveen Khan**
+AI Engineer | Machine Learning | Generative AI | AI Automation
