@@ -17,7 +17,7 @@ An AI-powered email automation system built with **n8n**, **OpenRouter LLMs**, *
 
 
 <p align="center">
-  <img src="assets/image.png" alt="AI Cold Email Automation Workflow" width="1000">
+  <img src="image.png" alt="AI Cold Email Automation Workflow" width="1000">
 </p> 
 
 1. **Schedule Trigger**
