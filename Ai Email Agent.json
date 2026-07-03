@@ -1,0 +1,450 @@
+{
+  "name": "Ai Email Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 4
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -560,
+        32
+      ],
+      "id": "83b08fce-abf0-42d7-983b-d19a85075ca9",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        32,
+        288
+      ],
+      "id": "2def49fa-2aee-4da5-a28e-f4341bf9b9b7",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "4LkRiiVPLVWfjzZl",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"subject\": {\n      \"type\": \"string\"\n    },\n    \"body\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\"subject\", \"body\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        288
+      ],
+      "id": "252b7cd4-942d-46d8-bce9-45ae21d13ec5",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get ALL input items (not just first)\nconst items = $input.all();\n\n// Function to format a single email body\nfunction formatEmail(body) {\n    if (!body) return \"\";\n    \n    let formatted = body\n        .replace(/\\\\\\\\n/g, '\\n')\n        .replace(/\\\\n/g, '\\n')\n        .replace(/\\n{3,}/g, '\\n\\n')\n        .replace(/-\\s+/g, '- ')\n        .trim();\n    \n    return formatted;\n}\n\n// Function to extract value safely from any structure\nfunction extractValue(data, fieldName) {\n    if (!data) return null;\n    if (data[fieldName]) return data[fieldName];\n    if (data.output && data.output[fieldName]) return data.output[fieldName];\n    if (data.body && fieldName === 'body') return data.body;\n    if (data.subject && fieldName === 'subject') return data.subject;\n    return null;\n}\n\n// Process EACH item and return ALL items\nconst formattedItems = [];\n\nfor (let i = 0; i < items.length; i++) {\n    const data = items[i].json;\n    \n    // Extract subject and body\n    let subject = extractValue(data, 'subject') || \"No Subject\";\n    let emailBody = extractValue(data, 'body') || \"\";\n    \n    // If body is empty, try to get from other fields\n    if (!emailBody && data.output) {\n        emailBody = data.output.body || data.output.message || \"\";\n    }\n    if (!emailBody && data.text) {\n        emailBody = data.text;\n    }\n    \n    // Add formatted email to results\n    formattedItems.push({\n        json: {\n            subject: subject,\n            body: formatEmail(emailBody),\n            original_subject: subject,\n            original_body: emailBody,\n            email: data.email || data.to || \"\",\n            company: data.company_name || data.Company || \"\",\n            index: i + 1,\n            formatted_at: new Date().toISOString()\n        }\n    });\n}\n\n// Return ALL formatted items (same count as input)\nreturn formattedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        32
+      ],
+      "id": "537ecc55-d42b-4974-abb7-0e8b50c770c8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Nbp3r_30z_EwfpK5vaNFqDwPfw4ua31BqQl_EeG54rs",
+          "mode": "list",
+          "cachedResultName": "AI agents Emails ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nbp3r_30z_EwfpK5vaNFqDwPfw4ua31BqQl_EeG54rs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nbp3r_30z_EwfpK5vaNFqDwPfw4ua31BqQl_EeG54rs/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -352,
+        32
+      ],
+      "id": "3682d5a0-fc4c-456b-b466-8585c0ea3343",
+      "name": "Get data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ZOromc6mgZuKTO7T",
+          "name": "Oauth  account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a helpful You are a professional B2B sales copywriter specializing in AI and chatbot solutions.\nmy name is naveen khan\nYour task is to generate a highly personalized, persuasive cold email to sell chatbot services to a company.\n\nYou will be given:\n- Recipient email address [{{ $json.Email }}]\n- Business category [{{ $json.Category }}]\n- Name {{ $json.Name }}\nYour job:\nWrite a concise, compelling sales email tailored to that specific business category.\n\nRequirements:\n\n1. Tone:\n- Professional, confident, and results-driven\n- Clear and easy to read\n- Avoid hype or exaggerated claims\n\n2. Structure:\n- Personalized opening based on business category\n- Clear value proposition\n- Include relevant performance metrics (use realistic ranges such as):\n  - 40–60% reduction in support workload\n  - 30–50% faster response times\n  - 20–35% increase in conversions\n- Include 2–3 short bullet points of key benefits tailored to the business category\n- Add 2–3 sample past customer companies (make them realistic but fictional and industry-relevant)\n- Include measurable results for those companies (percent improvements)\n- Strong but polite call-to-action (ask for a short call/demo)\n\n3. Personalization:\nAdapt use cases based on business category:\n- eCommerce → cart recovery, order tracking, product recommendations\n- healthcare → appointment booking, patient FAQs\n- real estate → lead qualification, property inquiries\n- SaaS → onboarding, support automation\n- etc.\n\n4. Output format (STRICT):\nReturn ONLY valid JSON. No explanations, no extra text.\n\nJSON structure:\n{\n  \"subject\": \"string\",\n  \"body\": \"string\"\n}\n\n5. Body formatting:\n- Use newline characters (\\n) for line breaks\n- Use bullet points with \"-\" inside the string\n- Keep total length between 120–180 words\n\n6. Constraints:\n- Do not include emojis\n- Do not mention AI or that this is generated\n- Do not include placeholders like [Your Name]\n- Do not include greeting like \"Hope you're doing well\" more than once\n\n7. Names:\n- Generate realistic but fictional company names\n- Ensure they match the business category\n\nGoal:\nThe output should be clean, ready-to-send JSON containing a high-converting cold email.\n\nassistant",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        112,
+        32
+      ],
+      "id": "b9fbfdf7-9485-4f29-ba39-cd64fe2ffbe6",
+      "name": "AI Agent(Email Writer"
+    },
+    {
+      "parameters": {
+        "maxItems": 3
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        32
+      ],
+      "id": "be9177f6-8daf-4076-8125-bb1826e82118",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get data').item.json.Email }}",
+        "subject": "={{ $('AI Agent(Email Writer').item.json.output.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        32
+      ],
+      "id": "56c51109-2487-4670-a8cc-07fe8ce30820",
+      "name": "Send Emails",
+      "webhookId": "3ad51235-ccb4-4c87-92d3-064aac703b78",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I6sj8siwzHFZ5HX8",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1Nbp3r_30z_EwfpK5vaNFqDwPfw4ua31BqQl_EeG54rs",
+          "mode": "list",
+          "cachedResultName": "AI agents Emails ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nbp3r_30z_EwfpK5vaNFqDwPfw4ua31BqQl_EeG54rs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Nbp3r_30z_EwfpK5vaNFqDwPfw4ua31BqQl_EeG54rs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Subject": "={{ $('AI Agent(Email Writer').item.json.output.subject }}",
+            "Body": "={{ $('AI Agent(Email Writer').item.json.output.body }}",
+            "Sent Date": "=\t{{ new Date($now).toLocaleDateString() }}",
+            "Sent Time.": "=\t{{ new Date($now).toLocaleTimeString() }}",
+            "Email": "={{ $('Get data').item.json.Email }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Purpose",
+              "displayName": "Purpose",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Body",
+              "displayName": "Body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sent Date",
+              "displayName": "Sent Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sent Time.",
+              "displayName": "Sent Time.",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        32
+      ],
+      "id": "c6ff3e5d-5bc2-4c09-be54-66501c0b8aa5",
+      "name": "Add Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ZOromc6mgZuKTO7T",
+          "name": "Oauth  account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1jOu7oAj5NQaPzju3afdauTCPgVQL6OID",
+          "mode": "list",
+          "cachedResultName": "cv.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1jOu7oAj5NQaPzju3afdauTCPgVQL6OID/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        624,
+        32
+      ],
+      "id": "20610109-e82c-42f3-8785-61751527ce27",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "cg0cgG2xVfz1YBOb",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent(Email Writer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent(Email Writer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get data": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent(Email Writer": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "AI Agent(Email Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Emails": {
+      "main": [
+        [
+          {
+            "node": "Add Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Data": {
+      "main": [
+        []
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Send Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f26805b4-d164-4561-9b0b-7f08a7d25a4e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "236a56cdc636bb7fb69755b64a62acd553278fc4890296266aa464bee65c6938"
+  },
+  "id": "bnPMNppgDXB2N4Sr",
+  "tags": []
+}
